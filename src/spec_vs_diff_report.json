@@ -1,0 +1,110 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T12:11:25.665Z",
+  "summary": "The diff adds a new Motoko backend actor with thread/event types and some thread CRUD scaffolding plus a React admin console with II-based gating, thread list/detail UI (including export and delete), a Telegram settings page (mostly placeholder), and a security guidance page. Several core requirements—especially stable persistence, full thread/message CRUD, and real Telegram polling/token workflows—are not evidenced in the provided diff summary. The diff also introduces unrequested features like user profiles and an “admin secret token via URL parameter” initialization flow.",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "Stable persistence across upgrades using stable storage (preupgrade/postupgrade or stable structures) for threads and events.",
+      "reason": "The backend shows in-memory Maps for `threads` and `events`, but the diff snippet does not show any stable variables or upgrade hooks to persist/restore state across upgrades.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-1",
+      "requirement": "Complete CRUD operations for threads and messages/events: list threads, get thread details, append message/event, edit title, delete thread, delete/soft-delete message/event, and admin-only clear-all-data.",
+      "reason": "Only `createThread` and the beginning of `updateThread` are visible; required methods like list/get/append/delete/clear-all are not evidenced in the truncated backend diff.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Admin allowlist mechanism with initial admin = installer and admin add/remove management.",
+      "reason": "Frontend expects `isCallerAdmin()` and backend includes an authorization mixin, but the diff does not show explicit admin allowlist management methods (add/remove admins) or initial-admin bootstrap behavior.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/components/auth/AdminGate.tsx"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Telegram polling via HTTPS outcalls (getUpdates) on a timer with offset tracking and persistence of inbound Telegram messages into per-chat threads, plus optional sendMessage.",
+      "reason": "Although `http-outcalls/outcall` is imported, the diff summary does not show any implemented polling loop/timer controls, offset tracking, getUpdates parsing, per-chat thread derivation, or sendMessage support. The Telegram frontend page explicitly notes it is a placeholder and does not call the backend.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/pages/TelegramPanelPage.tsx"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Admin-only runtime set/rotate Telegram bot token stored only in volatile canister memory, never returned by query, and not persisted to stable storage by default.",
+      "reason": "The Telegram UI currently does not call the backend to set/rotate a token (comment says it would in a real implementation). No backend token setter/rotation API or volatile-only handling is evidenced in the backend snippet.",
+      "evidence": [
+        "frontend/src/pages/TelegramPanelPage.tsx",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Telegram control panel fully wired to backend: set token, start/stop polling, set interval, show last poll time and last processed update id, and sendMessage test with success/failure feedback.",
+      "reason": "The Telegram panel shows masked token entry but uses local state only and shows static/placeholder polling status (e.g., 'Not configured', 'Never'). No evidence of React Query hooks/mutations for Telegram controls or status queries is shown.",
+      "evidence": [
+        "frontend/src/pages/TelegramPanelPage.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "User profile system (name + optional Telegram username) with profile setup dialog and backend profile storage/APIs.",
+      "reason": "The BuildRequest does not request user profiles; it focuses on thread memory, admin access control, Telegram polling/token controls, and admin UI for threads/telegram/security guidance.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/components/auth/ProfileSetupDialog.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/App.tsx",
+        "frontend/src/components/layout/AdminLayout.tsx"
+      ]
+    },
+    {
+      "description": "Access control initialization via a secret URL/session parameter `caffeineAdminToken` and backend call `_initializeAccessControlWithSecret`.",
+      "reason": "The BuildRequest specifies Internet Identity-based authorization with an admin allowlist (installer/admin-managed), not a secret token passed through URL parameters for initialization.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts",
+        "frontend/src/utils/urlParams.ts"
+      ]
+    }
+  ],
+  "confidence": 0.74,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/auth/AdminGate.tsx",
+    "frontend/src/components/auth/ProfileSetupDialog.tsx",
+    "frontend/src/components/layout/AdminLayout.tsx",
+    "frontend/src/components/screens/AccessDeniedScreen.tsx",
+    "frontend/src/components/threads/EventRow.tsx",
+    "frontend/src/components/threads/ExportThreadButton.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/SecurityGuidancePage.tsx",
+    "frontend/src/pages/TelegramPanelPage.tsx",
+    "frontend/src/pages/ThreadDetailPage.tsx",
+    "frontend/src/pages/ThreadsPage.tsx",
+    "frontend/src/utils/urlParams.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

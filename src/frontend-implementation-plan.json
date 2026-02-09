@@ -1,0 +1,179 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Private admin console for ICP “soul” threads + Telegram controls",
+  "requirements": [
+    {
+      "id": "REQ-2",
+      "summary": "Gate all admin UI behind Internet Identity and enforce admin-only UX with clear unauthorized handling.",
+      "acceptanceCriteria": [
+        "Unauthenticated users cannot access the admin UI routes or read data from the canister."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "create",
+          "description": "Create the top-level app router/layout with guarded admin routes (threads, thread detail, Telegram panel, guidance). Use the existing `useInternetIdentity` and `useActor` hooks (do not modify them) to require login and to check admin status via the backend actor; render an access denied screen when unauthorized. Wire navigation so all created pages are reachable."
+        },
+        {
+          "path": "frontend/src/components/auth/AdminGate.tsx",
+          "operation": "create",
+          "description": "Add an admin guard component that blocks rendering of protected views unless the user is authenticated and `isCallerAdmin()` is true (React Query). Ensure fail-closed behavior and show clear errors for authorization failures. (authorization component alignment: follow its frontend guidance for auth gating and handling traps). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/auth/ProfileSetupDialog.tsx",
+          "operation": "create",
+          "description": "Implement first-login profile setup flow using `getCallerUserProfile()` / `saveCallerUserProfile()` with React Query to avoid modal flash (per authorization component guidance). Use shadcn-ui dialog/form primitives for UX consistency. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/screens/AccessDeniedScreen.tsx",
+          "operation": "create",
+          "description": "Create an access denied screen for non-admin/unauthenticated users with a login button and concise explanation (no principal leakage). Use shadcn-ui components for consistent styling. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Provide an admin-only workflow to set/rotate the Telegram Bot Token without ever displaying it after entry.",
+      "acceptanceCriteria": [
+        "The app never commits or displays the token in plaintext after initial entry (UI masks it and canister does not return it via any query).",
+        "Admin UI includes a clear warning that the token previously shared in chat must be revoked/rotated before real use."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/TelegramPanelPage.tsx",
+          "operation": "create",
+          "description": "Create the Telegram control panel page including a masked token input (password field), a one-way submit action to set/rotate token (do not display the token after submission), and a prominent warning that the token previously shared in chat must be revoked/rotated before real use. Ensure token input is held only in component state (no localStorage) and cleared after submit."
+        },
+        {
+          "path": "frontend/src/hooks/useTelegramAdmin.ts",
+          "operation": "create",
+          "description": "Add React Query mutations/queries used by the Telegram panel for token rotation and status display. Ensure all calls are disabled unless authenticated/admin; surface authorization failures as user-friendly errors."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Build the private admin threads UI: list/search, view timeline, append admin notes, rename, delete, and export.",
+      "acceptanceCriteria": [
+        "Admin UI provides: thread list with basic metadata, thread detail view showing ordered messages/events, and controls to add an admin note event.",
+        "Admin UI provides actions: rename thread, delete thread, delete/soft-delete message/event, and export thread (JSON download) from the browser.",
+        "All data fetching/mutations use React Query with loading/error states."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ThreadsPage.tsx",
+          "operation": "create",
+          "description": "Implement the thread list page (admin-only via AdminGate): fetch threads with React Query, show loading/error states, provide client-side search/filter, and navigate to a thread detail view. Use shadcn-ui table/list, input, and button components for UI consistency. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/ThreadDetailPage.tsx",
+          "operation": "create",
+          "description": "Implement the thread detail view (admin-only): fetch thread + events with React Query; render ordered timeline; allow append admin note event; rename thread; delete thread; delete/soft-delete an event; and export thread JSON via browser download (Blob). Use shadcn-ui components for timeline sections, forms, dialogs, and destructive confirmations. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useThreads.ts",
+          "operation": "create",
+          "description": "Create React Query hooks for threads/events: list threads, get thread, get events, append event (admin note), update thread title, delete thread, delete event, and refetch/invalidate appropriately. Standardize error mapping for authorization traps and show safe messages."
+        },
+        {
+          "path": "frontend/src/components/threads/ExportThreadButton.tsx",
+          "operation": "create",
+          "description": "Add a reusable export button that downloads the selected thread (metadata + events) as JSON using in-memory data only. Ensure it does not persist exported content automatically and provides success/failure feedback via UI."
+        },
+        {
+          "path": "frontend/src/components/threads/EventRow.tsx",
+          "operation": "create",
+          "description": "Add a reusable event renderer with metadata disclosure and a delete/redact action, keeping message contents visually restrained by default (privacy-focused). Use shadcn-ui badges/buttons/menus where appropriate. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the threads list and thread detail pages into the router and navigation, ensuring they are only accessible through the admin guard and are the primary workflow after login."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Add an admin-only Telegram control panel to manage polling and send test messages with status feedback.",
+      "acceptanceCriteria": [
+        "UI has controls to: set token (masked), start polling, stop polling, set polling interval, and view last poll time + last processed update id.",
+        "UI includes a test form to send a Telegram message to a provided chat id and shows success/failure feedback.",
+        "All actions are admin-only and fail closed when not authenticated/authorized."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/TelegramPanelPage.tsx",
+          "operation": "modify",
+          "description": "Expand the Telegram control panel UI: start/stop polling controls, polling interval input, integration status section (last poll time + last processed update id), and a sendMessage test form (chat id + message) with success/failure feedback. Ensure all actions are disabled/blocked unless authenticated/admin."
+        },
+        {
+          "path": "frontend/src/hooks/useTelegramAdmin.ts",
+          "operation": "modify",
+          "description": "Add React Query mutations/queries for polling controls, interval updates, integration status, and sendMessage test. Ensure proper loading/error states and cache invalidation after actions."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the Telegram panel route into navigation and ensure it is guarded by admin-only access."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Apply a consistent privacy/security console theme (non-blue/purple primary) across the admin app.",
+      "acceptanceCriteria": [
+        "A single theme direction is evident across layout, nav, tables/lists, and forms.",
+        "Primary palette is not blue/purple; contrast and readability are acceptable.",
+        "UI feels like a privacy/security-focused console (clear hierarchy, restrained accents, consistent spacing)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "create",
+          "description": "Create global styles and CSS variables used by Tailwind/shadcn to establish a cohesive console theme (e.g., charcoal neutrals with a green/amber accent; avoid blue/purple primaries). Include light/dark mode variable sets and consistent typography/spacing defaults."
+        },
+        {
+          "path": "frontend/src/components/layout/AdminLayout.tsx",
+          "operation": "create",
+          "description": "Create a shared admin layout (top bar + side/nav + content container) that applies the theme consistently across pages and provides a security-console feel. Use shadcn-ui layout primitives where appropriate. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wrap all admin pages in the shared AdminLayout and ensure consistent navigation styling and page structure across Threads, Thread Detail, Telegram, and Guidance views."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Add privacy/security hardening UX: redaction path, no secret persistence, and in-app operational guidance.",
+      "acceptanceCriteria": [
+        "Frontend provides a simple “redact/delete” path for sensitive content (delete message/event) and does not store sensitive secrets in browser storage beyond the current session.",
+        "A short in-app or README-style guidance section exists in the UI explaining: token rotation, how to obtain chat id, how polling works, and what data is stored."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/SecurityGuidancePage.tsx",
+          "operation": "create",
+          "description": "Add an in-app guidance page (admin-only) documenting operational steps for private running: token rotation, how to obtain a Telegram chat id, how polling behaves at a high level, what data is stored, and recommended admin principal hygiene. Keep text in English per user preference."
+        },
+        {
+          "path": "frontend/src/pages/ThreadDetailPage.tsx",
+          "operation": "modify",
+          "description": "Ensure a clear redact/delete path is present for events (delete action with confirmation), and avoid any UI behavior that caches sensitive message content outside the current in-memory React state/query cache."
+        },
+        {
+          "path": "frontend/src/pages/TelegramPanelPage.tsx",
+          "operation": "modify",
+          "description": "Ensure the token field is never persisted to localStorage and is cleared after successful submission; add small inline reminders about not pasting tokens into screenshots/logs and about rotation."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the Security/Guidance page into the router and navigation so it is discoverable from the admin console."
+        }
+      ]
+    }
+  ]
+}

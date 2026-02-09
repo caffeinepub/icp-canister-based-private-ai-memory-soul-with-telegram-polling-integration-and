@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build an ICP (Internet Computer) based personal AI memory (“soul”) system: a canister to store/manage persistent agent memory, a minimal external Telegram gateway to receive webhooks and forward messages to the canister, and a private web frontend to manage memory as conversation threads, with a focus on maximum privacy/security.",
+  "architectural_notes": [
+    "Telegram cannot send webhooks directly to an ICP canister; a minimal external gateway is required to receive updates and relay them to the canister.",
+    "Bot token should be provided/managed by the user and must not be stored in plaintext in the canister or source control; prefer secrets/env vars on the gateway."
+  ],
+  "known_issues": [
+    "User shared a Telegram Bot Token in chat; token is now compromised and should be revoked/rotated immediately before deploying.",
+    "Previous attempt to generate/build the project failed ('The AI struggled with your request'); generation needs to be retried in smaller steps."
+  ],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-add-internet-identity-based-access-control-so-that-only-authorized-principals-can-view-or-modify-stored-memory-manage-telegram-settings-or-trigger-administrative-actions",
+      "title": "Add Internet Identity-based access control so that only authorized principals can view or modify stored memory, manage Telegram settings, or trigger administrative actions.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-handle-the-telegram-bot-token-securely-do-not-hardcode-it-in-source-control-do-not-expose-it-in-the-ui-after-entry-and-do-not-persist-it-to-stable-storage-by-default-provide-an-admin-only-workflow-to-set-rotate-it-at-runtime",
+      "title": "Handle the Telegram Bot Token securely: do not hardcode it in source control, do not expose it in the UI after entry, and do not persist it to stable storage by default; provide an admin-only workflow to set/rotate it at runtime.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-private-web-admin-frontend-to-manage-memory-threads-sign-in-with-internet-identity-list-search-threads-view-a-thread-timeline-append-notes-edit-titles-delete-threads-messages-and-export-data",
+      "title": "Build a private web admin frontend to manage “memory threads”: sign-in with Internet Identity, list/search threads, view a thread timeline, append notes, edit titles, delete threads/messages, and export data.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-admin-only-telegram-control-panel-in-the-frontend-to-configure-polling-view-integration-status-set-rotate-token-and-run-a-sendmessage-test-to-a-specified-chat-id",
+      "title": "Add an admin-only Telegram control panel in the frontend to configure polling, view integration status, set/rotate token, and run a sendMessage test to a specified chat id.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-coherent-creative-visual-theme-for-the-admin-web-app-colors-typography-spacing-and-component-styling-and-enforce-it-consistently-across-all-pages-without-using-a-blue-purple-primary-palette",
+      "title": "Apply a coherent, creative visual theme for the admin web app (colors, typography, spacing, and component styling) and enforce it consistently across all pages without using a blue/purple primary palette.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-privacy-security-hardening-defaults-minimize-logging-of-message-contents-provide-redaction-controls-in-the-ui-and-document-operational-steps-needed-to-run-privately-token-rotation-admin-principals-polling-behavior",
+      "title": "Add privacy/security hardening defaults: minimize logging of message contents, provide redaction controls in the UI, and document operational steps needed to run privately (token rotation, admin principals, polling behavior).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "ICP canister backend to store/manage persistent AI 'soul' memory (full history) and expose read/write endpoints",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Telegram integration via external gateway service to receive Telegram webhooks and forward messages to the ICP canister; canister can send messages via Telegram API (outcalls)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Private web frontend to manage AI memory as 'threads' (view/edit/admin)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Privacy/security hardening for the system (token handling, access control, minimal logging, secure storage strategy)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Implement a Motoko canister that stores the agent “soul” as persistent conversation threads (thread metadata + ordered message/events), with CRUD operations for threads and messages and stable persistence across upgrades.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Implement Telegram integration without an external gateway by having the canister poll Telegram’s Bot API using HTTPS outcalls (getUpdates) on a timer, store incoming messages into threads, and optionally respond via sendMessage.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "ICP canister-based private AI memory (“soul”) with Telegram polling integration and web admin threads UI",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

@@ -1,0 +1,195 @@
+{
+  "kind": "build_request",
+  "title": "ICP canister-based private AI memory (“soul”) with Telegram polling integration and web admin threads UI",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Implement a Motoko canister that stores the agent “soul” as persistent conversation threads (thread metadata + ordered message/events), with CRUD operations for threads and messages and stable persistence across upgrades.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-5",
+          "msg-6"
+        ],
+        "quotes": [
+          "2 creo que debes guardar toda la memoria \"soul\"",
+          "3  front end para gestionar memoria \"hilos\" me parece correcto.",
+          "Quiero que lo hagas lo más completo posible y lo más privado posible también"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A thread data model exists with: threadId, title (optional), createdAt, updatedAt, and a list of message/events with timestamps and roles (e.g., user/assistant/system).",
+        "Canister exposes update/query methods to: create thread, list threads, get thread details, append message/event, edit thread title, delete thread, delete a message/event (or mark as deleted), and clear all data (admin-only).",
+        "Data remains available after canister upgrade (stable storage used appropriately)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add Internet Identity-based access control so that only authorized principals can view or modify stored memory, manage Telegram settings, or trigger administrative actions.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-5",
+          "msg-6"
+        ],
+        "quotes": [
+          "lo más privado posible",
+          "Haz lo que mejor veas por seguridad"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Unauthenticated users cannot access the admin UI routes or read data from the canister.",
+        "Canister enforces authorization checks on all non-public methods; unauthorized calls are rejected with clear errors.",
+        "There is an admin allowlist mechanism (e.g., initial admin = canister installer; admin can add/remove additional admins)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Implement Telegram integration without an external gateway by having the canister poll Telegram’s Bot API using HTTPS outcalls (getUpdates) on a timer, store incoming messages into threads, and optionally respond via sendMessage.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-2",
+          "msg-6"
+        ],
+        "quotes": [
+          "Claramente el artículo te habló de la inteligencia artificial en telegram.",
+          "1 si haz el canister"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Canister has start/stop controls (admin-only) to enable/disable polling and to set/reset polling interval.",
+        "Polling uses Telegram getUpdates with offset tracking to avoid reprocessing the same updates.",
+        "Incoming Telegram messages are persisted into a per-chat thread (e.g., threadId derived from chat_id) and include enough metadata to trace origin (chat id, username when available, message id).",
+        "Canister can send outbound Telegram messages using sendMessage (admin-triggered test + optional auto-reply mode).",
+        "No external webhook receiver service is required for Telegram messages to reach the system."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Handle the Telegram Bot Token securely: do not hardcode it in source control, do not expose it in the UI after entry, and do not persist it to stable storage by default; provide an admin-only workflow to set/rotate it at runtime.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "8051900184:AAETh5fG0m3bdsUnvQpeBoINZBcjfmnlrtw"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The app never commits or displays the token in plaintext after initial entry (UI masks it and canister does not return it via any query).",
+        "Token can be set/updated via an admin-only call from the frontend and is held only in volatile canister memory (requires re-entry after redeploy/upgrade).",
+        "Admin UI includes a clear warning that the token previously shared in chat must be revoked/rotated before real use."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Build a private web admin frontend to manage “memory threads”: sign-in with Internet Identity, list/search threads, view a thread timeline, append notes, edit titles, delete threads/messages, and export data.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "front end para gestionar memoria \"hilos\" me parece correcto."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin UI provides: thread list with basic metadata, thread detail view showing ordered messages/events, and controls to add an admin note event.",
+        "Admin UI provides actions: rename thread, delete thread, delete/soft-delete message/event, and export thread (JSON download) from the browser.",
+        "All data fetching/mutations use React Query with loading/error states."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Add an admin-only Telegram control panel in the frontend to configure polling, view integration status, set/rotate token, and run a sendMessage test to a specified chat id.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5",
+          "msg-6"
+        ],
+        "quotes": [
+          "Que tengo que hacer yo o que necesitas de Telegram?",
+          "Haz lo que mejor veas por seguridad"
+        ]
+      },
+      "acceptanceCriteria": [
+        "UI has controls to: set token (masked), start polling, stop polling, set polling interval, and view last poll time + last processed update id.",
+        "UI includes a test form to send a Telegram message to a provided chat id and shows success/failure feedback.",
+        "All actions are admin-only and fail closed when not authenticated/authorized."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Apply a coherent, creative visual theme for the admin web app (colors, typography, spacing, and component styling) and enforce it consistently across all pages without using a blue/purple primary palette.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "lo más completo posible y lo más privado posible también"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A single theme direction is evident across layout, nav, tables/lists, and forms.",
+        "Primary palette is not blue/purple; contrast and readability are acceptable.",
+        "UI feels like a privacy/security-focused console (clear hierarchy, restrained accents, consistent spacing)."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Add privacy/security hardening defaults: minimize logging of message contents, provide redaction controls in the UI, and document operational steps needed to run privately (token rotation, admin principals, polling behavior).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-5",
+          "msg-6"
+        ],
+        "quotes": [
+          "lo más privado posible",
+          "Haz lo que mejor veas por seguridad"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend avoids debug logs that include Telegram message text or token.",
+        "Frontend provides a simple “redact/delete” path for sensitive content (delete message/event) and does not store sensitive secrets in browser storage beyond the current session.",
+        "A short in-app or README-style guidance section exists in the UI explaining: token rotation, how to obtain chat id, how polling works, and what data is stored."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or any files in frontend/src/components/ui; compose them instead.",
+    "Backend must remain a single Motoko actor (all logic in backend/main.mo); only add backend/migration.mo if state migration is necessary.",
+    "Do not implement an external webhook gateway server or any non-Motoko backend service (Telegram ingestion must be done via canister HTTPS outcalls + polling).",
+    "Do not store the Telegram Bot Token in source control; treat the token shared in chat as compromised and require rotation before deployment."
+  ],
+  "nonGoals": [
+    "Building or deploying a separate off-chain Telegram gateway service to receive webhooks.",
+    "Integrating with third-party authentication providers (only Internet Identity).",
+    "Sending email/SMS/push notifications.",
+    "Integrating with external LLM providers (OpenAI/Anthropic/etc.) for agent reasoning; this build focuses on memory + Telegram message ingestion/storage."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [
+      "Use English for any user-facing text in the build request."
+    ],
+    "preferencesToRemove": [],
+    "miscToAdd": [
+      "User shared a Telegram Bot Token in chat; token should be revoked/rotated before any real deployment."
+    ],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

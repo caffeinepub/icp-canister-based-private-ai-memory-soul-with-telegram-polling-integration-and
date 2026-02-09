@@ -1,0 +1,16 @@
+{
+  "frontend/src/App.tsx": "Main application component with TanStack Router setup, admin-gated routes for threads/telegram/guidance pages, theme provider, and profile setup dialog integration.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including user profiles, admin checks, thread CRUD, event management, and proper cache invalidation.",
+  "frontend/src/components/auth/AdminGate.tsx": "Authorization guard component that blocks rendering unless user is authenticated and verified as admin via backend, with loading states.",
+  "frontend/src/components/auth/ProfileSetupDialog.tsx": "Modal dialog for first-time user profile setup (name + optional Telegram username) with proper loading state handling to prevent flash.",
+  "frontend/src/components/screens/AccessDeniedScreen.tsx": "Full-screen access denied view with login button for unauthenticated users and clear messaging for unauthorized users.",
+  "frontend/src/components/layout/AdminLayout.tsx": "Shared admin console layout with responsive sidebar navigation, header, user profile display, logout functionality, and footer with attribution.",
+  "frontend/src/pages/ThreadsPage.tsx": "Thread list page with search/filter, card-based grid layout, and navigation to thread detail view.",
+  "frontend/src/pages/ThreadDetailPage.tsx": "Thread detail view with timeline of events, edit/delete/export controls, add admin note functionality, and event deletion with confirmation.",
+  "frontend/src/pages/TelegramPanelPage.tsx": "Telegram integration control panel with masked token input, security warnings about compromised token, and placeholder UI for polling controls and test messaging.",
+  "frontend/src/pages/SecurityGuidancePage.tsx": "Comprehensive security and operational guidance page covering token management, chat ID discovery, data storage, polling behavior, and admin hygiene.",
+  "frontend/src/components/threads/EventRow.tsx": "Reusable event display component with type-specific icons, metadata disclosure, timestamp formatting, and delete action with confirmation.",
+  "frontend/src/components/threads/ExportThreadButton.tsx": "Thread export button that downloads thread metadata and events as JSON file with timestamp, using in-memory blob creation.",
+  "frontend/src/index.css": "Global styles with OKLCH color system using a teal/cyan accent (hue 150) instead of blue/purple, with proper light/dark mode tokens and typography settings.",
+  "frontend/tailwind.config.js": "Tailwind configuration with custom color tokens, Inter/JetBrains Mono font stack, and extended design system for the security console aesthetic."
+}
